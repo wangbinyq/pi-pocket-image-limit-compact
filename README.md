@@ -36,13 +36,14 @@ What it does not do:
 Every pattern needs the words "too many", or a count with a limit, so an image that is too large or of the wrong format
 is not mistaken for this case:
 
-| Example                                                      |
-| ------------------------------------------------------------ |
-| `Too many images in request: 31 > 30`                        |
-| `Upstream request failed: Too many images in request: 36 > 30` |
-| `image count exceeds the limit of 20`                        |
-| `The number of images provided exceeds the maximum of 4`     |
-| `You may pass at most 8 images, but 9 were provided`         |
+| Example                                                        |
+| -------------------------------------------------------------- |
+| `Too many images in request: 31 > 30`                          |
+| `Upstream request failed: Too many images in request: 36 > 30`  |
+| `image count exceeds the limit of 20`                          |
+| `The number of images provided exceeds the maximum of 4`       |
+| `You may pass at most 8 images, but 9 were provided`           |
+| `the engine refused this request: IMG count outside 0..64` (halogen) |
 
 A provider with wording that none of these match is not helped. Open an issue with its error text.
 

@@ -12,13 +12,14 @@ import { defineExtension, GenerationTask, hook } from "@earendil-works/pi-durabl
 
 /**
  * Wording that says a request was refused for the number of images in it. Every pattern needs the words "too many", or
- * a count with a limit, so an image that is too large, or of a bad format, is not mistaken for one.
+ * a count with a limit, so an image that is too large, or of a bad format, is not mistaken for one. `img` covers the
+ * abbreviations that local servers use, as halogen does: "IMG count outside 0..64".
  */
 const TOO_MANY_IMAGES: readonly RegExp[] = [
     /\btoo many images?\b/i,
-    /\bimage[ _-]?count\b[^.]{0,40}\b(?:exceed\w*|over|greater|limit|maximum|max)\b/i,
-    /\bnumber of images\b[^.]{0,40}\b(?:exceed\w*|over|greater|limit|maximum|max)\b/i,
-    /\b(?:exceed\w*|over|greater than|more than|limit of|maximum of|max(?:imum)?)\b[^.]{0,20}\b\d+\s*images\b/i,
+    /\b(?:image|img)[ _-]?count\b[^.]{0,40}\b(?:exceed\w*|over|outside|greater|limit|maximum|max|0\.\.)\b/i,
+    /\bnumber of images\b[^.]{0,40}\b(?:exceed\w*|over|outside|greater|limit|maximum|max|0\.\.)\b/i,
+    /\b(?:exceed\w*|over|outside|greater than|more than|limit of|maximum of|max(?:imum)?)\b[^.]{0,20}\b\d+\s*images\b/i,
     /\bat most\s+\d+\s+images\b/i,
 ];
 

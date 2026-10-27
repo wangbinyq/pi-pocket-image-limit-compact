@@ -33,6 +33,7 @@ test("the wording of image-count rejections is recognized, and nothing else is",
         "The number of images provided exceeds the maximum of 4",
         "The number of images in the request exceeds the maximum of 4",
         "You may pass at most 8 images, but 9 were provided",
+        "the engine refused this request: IMG count outside 0..64",
     ];
 
     for (const text of refused) {
@@ -43,6 +44,7 @@ test("the wording of image-count rejections is recognized, and nothing else is",
         "image is too large: 5.2 MB",
         "unsupported image format: image/heic",
         "image/png is not supported by this model",
+        "image is 40000x40000; the limit before resizing is 16384",
         "The input token count (1196265) exceeds the maximum number of tokens allowed (1048575)",
         "Connection refused",
         "",
@@ -103,9 +105,10 @@ test("a run refused for too many images compacts once and answers", async () => 
         if (!refused && requests.filter((each) => !each.summary).length === 3) {
             refused = true;
 
+            // The wording that halogen, a local server, answers with.
             return fauxAssistantMessage([], {
                 stopReason: "error",
-                errorMessage: "400: Too many images in request: 5 > 2",
+                errorMessage: "400: {\"message\":\"the engine refused this request: IMG count outside 0..2\",\"type\":\"invalid_request_error\"}",
             });
         }
 
