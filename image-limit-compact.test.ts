@@ -14,7 +14,7 @@ import { join } from "node:path";
 import { after, test } from "node:test";
 import type { FauxResponseStep, Message } from "@earendil-works/pi-ai";
 import { fauxAssistantMessage, fauxText } from "@earendil-works/pi-ai/providers/faux";
-import { isTooManyImages, markOverflow } from "./image-limit-compact.ts";
+import { isPromptTooLarge, isTooManyImages, markOverflow } from "./image-limit-compact.ts";
 
 /** A 1×1 PNG. */
 const PNG = Buffer.from(
@@ -53,6 +53,32 @@ test("the wording of image-count rejections is recognized, and nothing else is",
     for (const text of others) {
         assert.equal(isTooManyImages(text), false, text);
     }
+});
+
+test("halogen's context refusal is recognized too", () => {
+    const refused = [
+        "400: {\"message\":\"the prompt does not fit: it is 463618 tokens and the context is 262144\"}",
+        "the prompt does not fit: it is 463618 tokens and the context is 262144, 201474 tokens over",
+    ];
+
+    for (const text of refused) {
+        assert.equal(isPromptTooLarge(text), true, text);
+        assert.equal(isTooManyImages(text), false, "it is not about images");
+    }
+
+    assert.equal(isPromptTooLarge("Connection refused"), false);
+    assert.equal(isPromptTooLarge("Too many images in request: 3 > 2"), false);
+});
+
+test("a prompt that does not fit becomes an overflow as well", () => {
+    const refusal = fauxAssistantMessage([], {
+        stopReason: "error",
+        errorMessage:
+            '400: {"message":"the prompt does not fit: it is 463618 tokens and the context is 262144","type":"invalid_request_error"}',
+    });
+
+    assert.equal(markOverflow(refusal), true);
+    assert.match(refusal.errorMessage!, /the prompt is larger than the context/);
 });
 
 test("only an image-count rejection becomes an overflow", () => {

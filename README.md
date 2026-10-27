@@ -1,22 +1,26 @@
 # image-limit-compact
 
-A Pi Pocket drop-in module: when a model refuses a request for carrying too many images, Pi compacts the conversation
-once and sends the request again, instead of ending the run.
+A Pi Pocket drop-in module: when a model refuses a request for carrying too many images, or says that the prompt does
+not fit its context, Pi compacts the conversation once and sends the request again, instead of ending the run.
 
 ```
 Error: 400: {"message":"Too many images in request: 31 > 30","type":"invalid_request_error"}
 ```
 
-Pi's auto-compaction only reacts to context-overflow errors (too many tokens). A rejection for the number of images is
-not one of them, so the run stops: a long session that reads screenshots or pictures ends there, and the only way back
-is `/compact` by hand, then asking Pi to continue.
+Pi's auto-compaction only reacts to the context-overflow errors whose wording it knows. A rejection for the number of
+images is not one of them, so the run stops: a long session that reads screenshots or pictures ends there, and the only
+way back is `/compact` by hand, then asking Pi to continue.
+
+The same happens with a local server that words its context refusal its own way. Halogen answers
+`the prompt does not fit: it is 463618 tokens and the context is 262144`, which Pi does not know either.
 
 ## What it does
 
 The module adds one hook to Pi's generation task, and no tool, route, or prompt section:
 
 - It reads each failed response.
-- If the error names too many images, it appends ` (context length exceeded: …)` to the error text.
+- If the error names too many images, or says that the prompt does not fit the context, it appends
+  ` (context length exceeded: …)` to the error text.
 - Pi Durable checks for overflow right after this hook, so the error now goes to its own overflow recovery: one
   compaction, then one retry. Nothing else about the run changes.
 
@@ -33,8 +37,8 @@ What it does not do:
 
 ## Error wordings it recognizes
 
-Every pattern needs the words "too many", or a count with a limit, so an image that is too large or of the wrong format
-is not mistaken for this case:
+For the number of images, every pattern needs the words "too many", or a count with a limit, so an image that is too
+large or of the wrong format is not mistaken for this case:
 
 | Example                                                        |
 | -------------------------------------------------------------- |
@@ -44,6 +48,12 @@ is not mistaken for this case:
 | `The number of images provided exceeds the maximum of 4`       |
 | `You may pass at most 8 images, but 9 were provided`           |
 | `the engine refused this request: IMG count outside 0..64` (halogen) |
+
+For the prompt size, it needs the words "does not fit" near prompt, request, context, or input:
+
+| Example                                                                             |
+| ----------------------------------------------------------------------------------- |
+| `the prompt does not fit: it is 463618 tokens and the context is 262144` (halogen)   |
 
 A provider with wording that none of these match is not helped. Open an issue with its error text.
 
