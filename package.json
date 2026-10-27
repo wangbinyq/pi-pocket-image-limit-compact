@@ -1,0 +1,16 @@
+{
+    "name": "pi-pocket-image-limit-compact",
+    "version": "1.0.0",
+    "description": "A Pi Pocket drop-in that compacts the conversation when a model refuses a request for too many images, then retries it",
+    "license": "MIT",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "test": "node --test image-limit-compact.test.ts",
+        "typecheck": "tsc -p tsconfig.json"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.0",
+        "@types/node": "^22.0.0"
+    }
+}
